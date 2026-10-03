@@ -120,6 +120,8 @@ Each mod has a `language` option: `en` (default), `zh-TW` or `zh-CN`. Change it 
 
 Use `leftovers@inline` as the key when the mod is loaded with `--plugin-dir` or `CLAUDE_CODE_PLUGIN_DIRS`.
 
+`/plugin install` notes that the option is not set yet. You can ignore that; it falls back to `en`.
+
 ## Development
 
 ```

@@ -133,6 +133,8 @@ Read、Edit、Write、NotebookEdit 的結果不遮，因為 Claude 要看到檔�
 
 用 `--plugin-dir` 或 `CLAUDE_CODE_PLUGIN_DIRS` 載入的話，key 改成 `leftovers@inline`。
 
+`/plugin install` 時會提示這個選項還沒設定，不設也沒關係，預設就是 `en`。
+
 ## 開發
 
 ```
