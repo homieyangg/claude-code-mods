@@ -110,6 +110,17 @@ test('寫檔用的 heredoc 內容不當指令，餵給 shell 的才算', () => {
   expect(left("bash <<'EOF'\ndocker run -d --name cache redis\nEOF")).toEqual(['docker cache @ local'])
 })
 
+test('同一條指令設的變數會代回去再記', () => {
+  expect(
+    left(
+      "P=~/Library/LaunchAgents/me.ezlo.tunnel.plist; cat > $P <<'EOF'\n<plist/>\nEOF\nplutil -lint $P && launchctl bootstrap gui/$(id -u) $P",
+    ),
+  ).toEqual(['launchd me.ezlo.tunnel @ local'])
+  expect(left('export NAME="cache"; docker run -d --name ${NAME} redis')).toEqual(['docker cache @ local'])
+  expect(left("ssh prod-1 'U=sync.timer; sudo systemctl enable --now $U'")).toEqual(['systemd sync.timer @ prod-1'])
+  expect(left('launchctl bootstrap gui/$(id -u) $UNSET')).toEqual(['launchd $UNSET @ local'])
+})
+
 test('備份檔路徑接上工作目錄，家目錄縮成 ~', () => {
   const place = { cwd: '/Users/x/proj', home: '/Users/x' }
   const labels = (command: string) =>

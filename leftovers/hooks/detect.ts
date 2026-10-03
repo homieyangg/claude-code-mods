@@ -69,6 +69,7 @@ const withoutDataHeredocs = (command: string): string =>
 const segmentsOf = (command: string): string[][] =>
   withoutDataHeredocs(command)
     .replace(/\$\([^)]*\)/g, 'X')
+    .replace(/=(['"])([^'"\n]*)\1/g, '=$2')
     .replace(/['"]/g, ' ')
     .split(/;|&&|\|\||\||\n/)
     .map(part =>
@@ -78,6 +79,31 @@ const segmentsOf = (command: string): string[][] =>
         .filter(word => word !== '' && word !== 'sudo'),
     )
     .filter(words => words.length > 0)
+
+const ASSIGNMENT = /^([A-Za-z_]\w*)=(.*)$/
+const VARIABLE = /\$(?:\{([A-Za-z_]\w*)\}|([A-Za-z_]\w*))/g
+
+// 同一條指令前面設過的變數先代回去，P=x.plist; launchctl bootstrap gui/1 $P 才會記成 x 而不是 $P
+const expanded = (words: readonly string[], vars: ReadonlyMap<string, string>): string[] =>
+  words.map(word =>
+    word.replace(VARIABLE, (whole: string, braced?: string, bare?: string) => vars.get(braced ?? bare ?? '') ?? whole),
+  )
+
+// 整段都是 NAME=value（可帶 export）才算設變數，回傳是否吃掉這段
+const assignedInto = (vars: Map<string, string>, words: readonly string[]): boolean => {
+  const pairs = words[0] === 'export' ? words.slice(1) : words
+
+  if (pairs.length === 0 || !pairs.every(word => ASSIGNMENT.test(word))) {
+    return false
+  }
+  pairs.forEach(word => {
+    const [, name = '', value = ''] = ASSIGNMENT.exec(word) ?? []
+
+    vars.set(name, value)
+  })
+
+  return true
+}
 
 const stripSsh = (words: readonly string[]): { host: string; rest: string[] } | undefined => {
   if (words[0] !== 'ssh') {
@@ -293,10 +319,12 @@ const RULES: Record<string, (ctx: Context) => void> = {
 // 從一條 Bash 指令找出「留下了什麼」和「收掉了什麼」，照指令裡的順序排
 export const detect = (command: string, place: Place = { cwd: '', home: '' }): Detected => {
   const out: Detected = { ops: [], dirs: [] }
+  const vars = new Map<string, string>()
   let host = LOCAL
   let cwd = ''
 
-  for (const segment of segmentsOf(command)) {
+  for (const words of segmentsOf(command)) {
+    const segment = expanded(words, vars)
     const ssh = stripSsh(segment)
 
     if (ssh !== undefined) {
@@ -304,7 +332,13 @@ export const detect = (command: string, place: Place = { cwd: '', home: '' }): D
       cwd = ''
     }
 
-    const [head, ...args] = ssh?.rest ?? segment
+    const run = ssh?.rest ?? segment
+
+    if (assignedInto(vars, run)) {
+      continue
+    }
+
+    const [head, ...args] = run
 
     if (head === undefined) {
       continue
