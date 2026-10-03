@@ -46,5 +46,6 @@ open('.env', 'w').write(
 )
 PY
 printf '.env\n' > .gitignore
-git add -A && git -c user.name=demo -c user.email=demo@example.com commit -qm init || true
+git add -A
+git diff --cached --quiet || git -c user.name=demo -c user.email=demo@example.com commit -qm init
 docker pull -q redis:alpine >/dev/null

@@ -102,6 +102,14 @@ test('worktree 路徑接上當時的工作目錄', () => {
   expect(labels('git worktree add /tmp/wt && git worktree remove ../../../tmp/wt')).toEqual([])
 })
 
+test('寫檔用的 heredoc 內容不當指令，餵給 shell 的才算', () => {
+  expect(left("cat > notes.md <<'EOF'\ndocker compose up -d\ncrontab jobs.txt\nEOF")).toEqual([])
+  expect(left("python3 - <<'EOF'\nprint('docker run -d img')\nEOF\ncp a.json a.json.bak")).toEqual([
+    'backup a.json.bak @ local',
+  ])
+  expect(left("bash <<'EOF'\ndocker run -d --name cache redis\nEOF")).toEqual(['docker cache @ local'])
+})
+
 test('備份檔路徑接上工作目錄，家目錄縮成 ~', () => {
   const place = { cwd: '/Users/x/proj', home: '/Users/x' }
   const labels = (command: string) =>

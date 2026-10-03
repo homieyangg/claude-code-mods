@@ -47,8 +47,27 @@ const drop = (ctx: Context, kind: LeftoverKind, label: string, host = ctx.host) 
 }
 
 // 引號攤平再切段，ssh 帶的遠端指令就能跟本機指令用同一套規則看
+const SHELLS = new Set(['ssh', 'bash', 'sh', 'zsh'])
+
+// 餵給 cat、python 這類的 heredoc 是資料，裡面長得像指令的行不能記；餵給 shell 或 ssh 的才是指令
+const withoutDataHeredocs = (command: string): string =>
+  command.replace(
+    /<<-?[ \t]*(['"]?)(\w+)\1([^\n]*)\n[\s\S]*?\n[ \t]*\2[ \t]*(?=\n|$)/g,
+    (whole: string, _quote: string, _tag: string, rest: string, offset: number) => {
+      const line = command.slice(command.lastIndexOf('\n', offset) + 1, offset)
+      const head = line
+        .split(/;|&&|\|\||\|/)
+        .pop()
+        ?.trim()
+        .split(/\s+/)
+        .find(word => word !== 'sudo')
+
+      return SHELLS.has(head ?? '') ? whole : rest
+    },
+  )
+
 const segmentsOf = (command: string): string[][] =>
-  command
+  withoutDataHeredocs(command)
     .replace(/\$\([^)]*\)/g, 'X')
     .replace(/['"]/g, ' ')
     .split(/;|&&|\|\||\||\n/)
