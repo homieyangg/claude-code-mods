@@ -118,6 +118,13 @@ Read、Edit、Write、NotebookEdit 的结果不脱敏，因为 Claude 要看到�
 | `/secret-mask` | 列出本次会话脱敏过的内容 |
 | `/secret-mask off` / `on` | 本次会话暂停或恢复脱敏 |
 
+## 点击按钮
+
+输入框上方和 `/leftovers` 里的按钮，只有在 Claude Code 的 fullscreen 模式下才能用鼠标点击。
+默认界面不会开启鼠标上报，点击传不到 Claude Code。
+在 `/config` 里开启 fullscreen，或在 `~/.claude/settings.json` 里加上 `"tui": "fullscreen"`。
+保持默认界面的话，按 `ctrl+x` 再按 `tab` 进入输入框上方那一行，用 `tab` 选按钮、回车确认。
+
 ## 语言
 
 每个 mod 都有 `language` 选项：`en`（默认）、`zh-TW`、`zh-CN`。

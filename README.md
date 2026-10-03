@@ -106,6 +106,10 @@ This is pattern matching, so it will miss things. Results from Read, Edit, Write
 | `/secret-mask` | List what was masked in this session |
 | `/secret-mask off` / `on` | Pause or resume masking for this session |
 
+## Clicking the buttons
+
+The buttons above the prompt and in `/leftovers` take mouse clicks only in Claude Code's fullscreen mode. The default renderer does not turn on mouse reporting, so clicks never reach it. Turn fullscreen on in `/config`, or add `"tui": "fullscreen"` to `~/.claude/settings.json`. In the default mode, press `ctrl+x` then `tab` to move into the row above the prompt, `tab` to pick a button and Enter to press it.
+
 ## Language
 
 Each mod has a `language` option: `en` (default), `zh-TW` or `zh-CN`. Change it in `/config`, or in `~/.claude/settings.json`:

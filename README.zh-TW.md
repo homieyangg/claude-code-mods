@@ -118,6 +118,13 @@ Read、Edit、Write、NotebookEdit 的結果不遮，因為 Claude 要看到檔�
 | `/secret-mask` | 列出這個 session 遮過的東西 |
 | `/secret-mask off` / `on` | 這個 session 暫停或恢復遮蔽 |
 
+## 點按鈕
+
+prompt 上方和 `/leftovers` 裡的按鈕，只有在 Claude Code 的 fullscreen 模式才點得到。
+預設畫面不會開滑鼠回報，點擊到不了 Claude Code。
+在 `/config` 開 fullscreen，或在 `~/.claude/settings.json` 加 `"tui": "fullscreen"`。
+維持預設畫面的話，按 `ctrl+x` 再按 `tab` 進到 prompt 上方那排，用 `tab` 選按鈕、Enter 按下。
+
 ## 語言
 
 每個 mod 都有 `language` 選項：`en`（預設）、`zh-TW`、`zh-CN`。
